@@ -1,0 +1,70 @@
+# Compilados do Visual Studio
+*.exe
+*.dll
+*.pdb
+*.app
+*.log
+*.vshost.*
+
+# Arquivos de build
+*.obj
+*.cache
+*.ilk
+*.map
+*.tmp
+*.tmp_proj
+*.userosscache
+*.suo
+*.unsuccessfulbuild
+*.sqlite
+
+# Logs, dados de depuração e relatórios
+*.log
+*.tlog
+*.vspscc
+*.vssscc
+*.pylint
+
+# Diretórios gerados automaticamente
+bin/
+obj/
+out/
+
+# Configurações locais do Visual Studio
+.vscode/
+.vs/
+*.suo
+*.user
+*.userprefs
+*.DotSettings.user
+
+# Configurações globais do NuGet
+*.nupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
+packages/
+*.csproj.user
+
+# Diretórios temporários
+TestResults/
+backup/
+_reSharper/
+*_ReSharper.*
+.idea/
+*.ide.*
+
+# Arquivos de configurações do Rider
+.idea/
+.idea.*
+*.sln.iml
+
+# Outros
+*.swp
+*.DS_Store
+*.orig
+*.bak
+*.swp
+Thumbs.db
+*.class
+*.pyc

@@ -1,0 +1,8 @@
+﻿# Esquema de entrada para o projeto de grafos
+
+-8 Número de pontos de coleta
+-01234567 Sequência dos símbolos dos pontos
+-019 028 132 233 251 341 364 377 672- * Adiciona as relações de vizinhança
+
+obs.: * Ponto1 Ponto2 PesoDaAresta
+	'-' indica ao algoritmo para considerar a linha
