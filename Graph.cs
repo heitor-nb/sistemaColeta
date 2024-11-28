@@ -139,13 +139,12 @@ namespace TesteProjetoGrafos
             }
         }
 
-        public void Percurso(char symbol, int v, ConcurrentDictionary<int, bool> visitados)
+        public void Percurso(char symbol, int v, ConcurrentDictionary<int, bool> visitados, ConcurrentQueue<Carrocinha> carrocinhas)
         {
             if(v < nodeCount && nodeCount > 0)
             {
                 var truck = new Truck();
                 Console.WriteLine($"Capacidade do caminhão {symbol}: {truck.Capacidade}");
-                //var aux = visitados.Count < 8 && !visitados.Values.Contains(false);
                 var aux = true;
                 while (aux)
                 {
@@ -159,13 +158,22 @@ namespace TesteProjetoGrafos
 
                         if (node.PossuiAnimal)
                         {
+                            if(carrocinhas.TryDequeue(out Carrocinha carrocinha)) // **
+                            {
+                                Console.WriteLine($"({symbol}) Carrocinha {carrocinha.Symbol} chamada para o ponto {v}");
+                                var task = Task.Run(() =>
+                                {
+                                    PercusoCarrocinha(carrocinha, Vetor.Length - 1, v, true, carrocinhas);
+                                });
+                            }
+
                             tempo = 2;
                             DistribuirAnimais(v);
 
                             Console.WriteLine($"({symbol}) Tempo dobrado em {v} pois lixo espalhado");
                         }
 
-                        Thread.Sleep(node.LatasLixo * lixoPorLata * 100 * tempo); // tempo para recolher o lixo
+                        Thread.Sleep(((node.LatasLixo * lixoPorLata)/truck.Funcionarios) * 100 * tempo); // tempo para recolher o lixo
 
                         var lixoRestante = truck.RecolherLixo(node.LatasLixo * lixoPorLata);
                         node.LatasLixo = (int)Math.Floor((decimal)lixoRestante / lixoPorLata); // **
@@ -179,7 +187,7 @@ namespace TesteProjetoGrafos
                             Console.WriteLine($"({symbol}) Lixo no ponto {v}: {node.LatasLixo * lixoPorLata} - Tem lixo: {update}");
                         }
 
-                        if (truck.Compactacoes == 2 && truck.Capacidade == 0)
+                        if (truck.Capacidade == 0) // && truck.Compactacoes == 2 
                         {
                             Console.WriteLine($"({symbol}) Retornando ao aterro - Capacidade = {truck.Capacidade}");
                             Thread.Sleep(SP.Valor[v].FirstOrDefault(kvp => kvp.Key == 0).Value * 100); // tempo para retornar ao aterro
@@ -196,14 +204,16 @@ namespace TesteProjetoGrafos
                     var ponto = SP.Valor[v][1].Key; // a primeira chave da lista sempre será o próprio v
                     int i = 2;
 
-                    //while i < 8 && (nao foi visitado ainda ou ainda tem lixo)
-                    while (i <= 8 && !visitados.TryAdd(ponto, true))//&& !visitados.TryUpdate(ponto, true, false))
+                    // Problema da rota mais próxima
+
+                    //while i < maxSize && (nao foi visitado ainda ou ainda tem lixo)
+                    while (i <= maxSize && !visitados.TryAdd(ponto, true))//&& !visitados.TryUpdate(ponto, true, false))
                     {
-                        if(i < 8) ponto = SP.Valor[v][i].Key;
+                        if (i < maxSize) ponto = SP.Valor[v][i].Key;
                         i++;
                     } // **
 
-                    if (i < 8)
+                    if (i < maxSize)
                     {
                         Console.WriteLine($"({symbol}) Indo de {v} para {ponto}");
                         Thread.Sleep(SP.Valor[v].FirstOrDefault(kvp => kvp.Key == ponto).Value * 100); // tempo para chegar ao ponto
@@ -212,7 +222,7 @@ namespace TesteProjetoGrafos
                     }
                     else
                     {
-                        aux = visitados.Count < 8; //visitados.Values.Contains(false);
+                        aux = visitados.Count < maxSize; //visitados.Values.Contains(false);
                         if (!aux)
                         {
                             Console.WriteLine($"({symbol}) Nenhum ponto a ser visitado\n" +
@@ -224,17 +234,50 @@ namespace TesteProjetoGrafos
             }
         }
 
-        //public void PercusoCarrocinha(int destino, ConcurrentDictionary<int, bool> visitados)
-        //{
-        //    var path = SP.Caminhos[7, destino];
-        //    int i = 0;
-        //    while(path[i] != Vetor[destino])
-        //    {
-        //        Thread.Sleep(SP.Valor[i][i + 1].Value * 100); // tempo para chegar ao prox ponto do caminho
-        //        i++;
-        //        if (Vetor[i].Gato > 0)
-        //    }
-        //}
+        public void PercusoCarrocinha(Carrocinha carrocinha, int origem, int destino, bool ida, ConcurrentQueue<Carrocinha> carrocinhas)
+        {
+            var path = SP.Caminhos[origem, destino]; // a carrocinha é o último ponto
+            int i = 0;
+            while (path[i] != Vetor[destino])
+            {
+                Thread.Sleep(SP.Valor[i][i + 1].Value * 100); // tempo para chegar ao prox ponto do caminho
+                i++;
+
+                while ((Vetor[i].Gato > 0 || Vetor[i].Cachorro > 0) && carrocinha.Capacidade > 0)
+                {
+                    if (Vetor[i].Cachorro > 0)
+                    {
+                        Vetor[i].Cachorro--;
+                        carrocinha.Capacidade--;
+                    }
+                    else
+                    {
+                        Vetor[i].Gato--;
+                        carrocinha.Capacidade--;
+                    }
+                }
+                Thread.Sleep(100); // tempo para recolher os animais
+
+                if (ida && carrocinha.Capacidade == 0)
+                {
+                    Console.WriteLine($"Carrocinha {carrocinha.Symbol} cheia. Retornando ao centro");
+
+                    if (carrocinhas.TryDequeue(out Carrocinha carrocinhaAux))
+                    {
+                        PercusoCarrocinha(carrocinhaAux, Vetor.Length - 1, destino, true, carrocinhas); // **
+                    }
+                    break;
+                }
+            }
+
+            if(destino != Vetor.Length - 1) PercusoCarrocinha(carrocinha, destino, Vetor.Length - 1, false, carrocinhas);
+            else
+            {
+                Console.WriteLine($"Carrocinha {carrocinha.Symbol} retornou ao centro.");
+                carrocinha.Capacidade = 5;
+                carrocinhas.Enqueue(carrocinha);
+            }
+        }
 
         public Retorno FloydWarshall()
         {

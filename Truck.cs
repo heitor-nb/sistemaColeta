@@ -10,6 +10,7 @@ namespace TesteProjetoGrafos
     {
         public int Capacidade { get; set; } = 60; // 60m^3
         public int Compactacoes { get; set; } = 0;
+        public int Funcionarios { get; set; } = 3;
 
         public int RecolherLixo(int qtd)
         {

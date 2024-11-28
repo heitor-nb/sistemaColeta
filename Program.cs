@@ -67,56 +67,94 @@ try
         index++;
     }
 
-    Console.WriteLine(count);
+    Console.WriteLine($"Número de arestas: {count}");
 
     grafo.SP = grafo.FloydWarshall(); // **
 
     grafo.ExibirAnimais();
-
     for (int i = 1; i < n; i++) grafo.DistribuirAnimais(i);
     grafo.ExibirAnimais();
 
-    grafo.ExibirPesos();
+    //grafo.ExibirPesos();
 
-    grafo.ExibirVizinhos();
+    //grafo.ExibirVizinhos();
 
-    grafo.ExibirDistancias();
+    //grafo.ExibirDistancias();
 
-    grafo.ExibirLixo();
+    //grafo.ExibirLixo();
+
+    //grafo.ExibirCaminhosMinimos();
+
+    // --------------------
+
+    var cts = new CancellationTokenSource();
+
+    var counterTask = Contador.StartCounterAsync(cts.Token);
+
+    Console.WriteLine("Contador iniciado.");
+
+    var alfabeto = "abcdefghijklmnopqrstuvwxyz";
+
+    var carrocinhas = new ConcurrentQueue<Carrocinha>();
+
+    for (int i = 0; i < 3; i++) carrocinhas.Enqueue(new Carrocinha(alfabeto[25 - i]));
 
     ConcurrentDictionary<int, bool> visitados = new();
 
-    visitados.TryAdd(0, true);
+    visitados.TryAdd(0, true); // marca o 0 (aterro) como visitado
 
-    Task task1 = Task.Run(() => grafo.Percurso('a', 0, visitados));
+    var tasks = new List<Task>();
 
-    Task task2 = Task.Run(() =>
+    for (int i = 0; i < 5; i++)
     {
-        Thread.Sleep(200); // representa que o caminhão dois saiu em segundo lugar
-        grafo.Percurso('b', 0, visitados);
-    });
+        var task = Task.Run(() =>
+        {
+            grafo.Percurso(alfabeto[i], 0, visitados, carrocinhas); // problema do símbolo errado
+        });
+        
+        tasks.Add(task);
 
-    Task task3 = Task.Run(() =>
-    {
-        Thread.Sleep(400); // representa que o caminhão dois saiu em segundo lugar
-        grafo.Percurso('c', 0, visitados);
-    });
+        Thread.Sleep(i * 200); // tempo de saída do aterro entre um caminhão e outro
+    }
 
-    Task task4 = Task.Run(() =>
-    {
-        Thread.Sleep(600); // representa que o caminhão dois saiu em segundo lugar
-        grafo.Percurso('d', 0, visitados);
-    });
+    await Task.WhenAll(tasks);
 
-    await Task.WhenAll(task1, task2, task3, task4);
+    Console.WriteLine("Percuso dos caminhões finalizados");
 
-    Console.WriteLine("End...");
+    // Sinaliza para o contador parar
+    cts.Cancel();
+
+    // Aguarda a finalização do contador
+    await counterTask;
+
+    Console.WriteLine("Contador finalizado.");
+
+    // --------------------
 }
 catch (Exception ex)
 {
     Console.WriteLine($"Erro: {ex.Message}");
 }
 
+//Task task1 = Task.Run(() => grafo.Percurso('a', 0, visitados));
+
+//Task task2 = Task.Run(() =>
+//{
+//    Thread.Sleep(200); // representa que o caminhão dois saiu em segundo lugar
+//    grafo.Percurso('b', 0, visitados);
+//});
+
+//Task task3 = Task.Run(() =>
+//{
+//    Thread.Sleep(400); // representa que o caminhão dois saiu em segundo lugar
+//    grafo.Percurso('c', 0, visitados);
+//});
+
+//Task task4 = Task.Run(() =>
+//{
+//    Thread.Sleep(600); // representa que o caminhão dois saiu em segundo lugar
+//    grafo.Percurso('d', 0, visitados);
+//});
 
 //var grafo = new Graph(8);
 //grafo.AddNode('0');
