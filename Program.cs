@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Security.Cryptography;
 using TesteProjetoGrafos;
 
 var endereco = "C:/Users/heito/source/repos/TesteProjetoGrafos/TesteProjetoGrafos/config.txt";
@@ -8,33 +9,71 @@ foreach (var item in lista) Console.WriteLine(item);
 
 try
 {
-    var n = lista[0][1] - '0'; //var n = (int)char.GetNumericValue(lista[0][1]);
+    var aux = string.Empty;
+    var index = 1;
+    while (lista[0][index] != ' ')
+    {
+        aux += lista[0][index];
+        index++;
+    }
+    var n = int.Parse(aux);
     var grafo = new Graph(n);
 
-    var index = 1;
-    while (lista[1][index] != ' ')
+    index = 1;
+    aux = string.Empty;
+    while(lista[1][index] != '-')
     {
-        grafo.AddNode(lista[1][index]);
+        var c = lista[1][index];
+        if (c != ',') aux += c;
+        else
+        {
+            Console.WriteLine(aux);
+            grafo.AddNode(aux);
+            aux = string.Empty; // **
+        }
         index++;
     }
 
+    grafo.ExibirNodeCount();
+
+    var count = 0;
     index = 1;
-    bool controle = lista[2][index] != '-';
-    while (controle)
+    var virgula = 0;
+    aux = string.Empty;
+    int p1 = 0, p2 = 0, peso = 0; // **
+    while (lista[2][index] != '-')
     {
-        var p1 = lista[2][index] - '0';
-        var p2 = lista[2][index + 1] - '0';
-        var peso = lista[2][index + 2] - '0';
-        grafo.AddVizinho(p1, p2, peso); // ponto 1, ponto 2, peso da aresta
-        if (lista[2][index + 3] == '-') controle = false;
-        index += 4;
+        var c = lista[2][index];
+
+        if (c != ',' && c != ' ') aux += c;
+        else
+        {
+            var i = int.Parse(aux);
+            aux = string.Empty;
+
+            if (virgula == 0) p1 = i;
+            if (virgula == 1) p2 = i;
+            else peso = i;
+            virgula++;
+        }
+
+        if (virgula == 3)
+        {
+            count++;
+            Console.WriteLine($"{p1} - {p2} - {peso}");
+            grafo.AddVizinho(p1, p2, peso);
+            virgula = 0;
+        }
+        index++;
     }
+
+    Console.WriteLine(count);
 
     grafo.SP = grafo.FloydWarshall(); // **
 
     grafo.ExibirAnimais();
 
-    for(int i = 1; i < n; i++) grafo.DistribuirAnimais(i);
+    for (int i = 1; i < n; i++) grafo.DistribuirAnimais(i);
     grafo.ExibirAnimais();
 
     grafo.ExibirPesos();
@@ -50,18 +89,26 @@ try
     visitados.TryAdd(0, true);
 
     Task task1 = Task.Run(() => grafo.Percurso('a', 0, visitados));
+
     Task task2 = Task.Run(() =>
     {
         Thread.Sleep(200); // representa que o caminhão dois saiu em segundo lugar
         grafo.Percurso('b', 0, visitados);
     });
+
     Task task3 = Task.Run(() =>
     {
         Thread.Sleep(400); // representa que o caminhão dois saiu em segundo lugar
         grafo.Percurso('c', 0, visitados);
     });
 
-    await Task.WhenAll(task1, task2, task3);
+    Task task4 = Task.Run(() =>
+    {
+        Thread.Sleep(600); // representa que o caminhão dois saiu em segundo lugar
+        grafo.Percurso('d', 0, visitados);
+    });
+
+    await Task.WhenAll(task1, task2, task3, task4);
 
     Console.WriteLine("End...");
 }

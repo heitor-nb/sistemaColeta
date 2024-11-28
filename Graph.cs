@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace TesteProjetoGrafos
@@ -33,18 +34,21 @@ namespace TesteProjetoGrafos
             }
         }
 
-        public void AddNode(char c)
+        public void ExibirNodeCount() => Console.WriteLine($"Node count: {nodeCount}");
+
+        public void AddNode(string str)
         {
 
             if (nodeCount < maxSize)
             {
-                var node = new Node(c) // organizar esse lógica
+                var node = new Node(str) // organizar esse lógica
                 {
-                    Index = nodeCount,
+                    Index = int.Parse(str),
                 };
-                if(nodeCount == 0) node.LatasLixo = 0; // **
-                Vetor[nodeCount] = node;
-                W[nodeCount, nodeCount] = 0;
+                var index = node.Index;
+                if(index == 0) node.LatasLixo = 0; // **
+                Vetor[index] = node;
+                W[index, index] = 0;
                 nodeCount++;
                 Console.WriteLine("Adicionado.");
             }
@@ -53,7 +57,7 @@ namespace TesteProjetoGrafos
 
         public void AddVizinho(int i, int j, int peso)
         {
-            if (i <= nodeCount && j <= nodeCount)
+            if (i < nodeCount && j < nodeCount)
             {
                 Vetor[i].N.Add(Vetor[j]); // *
                 Vetor[j].N.Add(Vetor[i]);
@@ -134,56 +138,6 @@ namespace TesteProjetoGrafos
                 }
             }
         }
-
-        //public void DFS(char symbol, int v, ConcurrentDictionary<int, bool> visitados)
-        //{
-        //    if (v < nodeCount && nodeCount > 0)
-        //    {
-        //        var truck = new Truck();
-        //        //visitados.TryAdd(v, true);
-        //        //Thread.Sleep(Vetor[v].LatasLixo * lixoPorLata * 100);
-        //        Console.WriteLine($"{Vetor[v].Symbol}");
-        //        Visitar(truck, symbol, Vetor[v], visitados);
-        //    }
-        //}
-
-        //private void Visitar(Truck truck, char origem, Node v, ConcurrentDictionary<int, bool> visitados)
-        //{
-        //    Thread.Sleep(v.LatasLixo * lixoPorLata * 100); // tempo para recolher o lixo
-        //    var lixoRestante = truck.RecolherLixo(v.LatasLixo * lixoPorLata);
-        //    if (lixoRestante > 0) visitados.TryUpdate(v.Index, false, true);
-        //    if(truck.Compactacoes == 2)
-        //    {
-        //        Thread.Sleep(SP[v.Index, 0] * 100); // tempo para retornar ao aterro
-        //        truck.Compactacoes = 0;
-        //        var menor = 0;
-        //        for(int i = 1; i < 8; i++)
-        //        {
-        //            visitados.TryGetValue(i, out bool value);
-        //            if (menor == 0 || (SP[0, menor] > SP[0, i] && !value)) menor = i;
-        //        }
-        //        if (visitados.TryAdd(menor, true))
-        //        {
-        //            Thread.Sleep(SP[0, menor] * 100); // tempo para chegar ao ponto de coleta com lixo menos distante
-        //            Console.WriteLine($"({origem})   {0} - {menor}");
-        //            Visitar(truck, origem, Vetor[menor], visitados);
-        //        }
-        //        else Console.WriteLine("erro linha 117 graph.cs");
-        //    }
-        //    foreach (var n in v.N)
-        //    {
-        //        if (visitados.TryAdd(n.Index, true))
-        //        {
-        //            Thread.Sleep(W[v.Index, n.Index] * 100); // tempo para chegar ao ponto
-        //            Console.WriteLine($"({origem})   {v.Symbol} - {n.Symbol}");
-        //            Visitar(truck, origem, n, visitados);
-        //            Console.WriteLine($"({origem}) R {n.Symbol} - {v.Symbol}");
-        //            Thread.Sleep(W[n.Index, v.Index] * 100); // tempo para retornar ao ponto de origem
-        //        }
-        //    }
-        //}
-
-        // prox passo retornar ao aterro quando finalizar
 
         public void Percurso(char symbol, int v, ConcurrentDictionary<int, bool> visitados)
         {
@@ -378,13 +332,12 @@ namespace TesteProjetoGrafos
 
         public void ExibirDistancias()
         {
-            // exibir as distancias para ver se a ordenação esta funcionando
             for(int u = 0; u < maxSize; u++)
             {
-                Console.Write($"{u}: ");
+                Console.WriteLine($"{u}: ");
                 for(int v = 0; v < maxSize; v++)
                 {
-                    Console.Write($"({SP.Valor[u][v].Key} - {SP.Valor[u][v].Value}), ");
+                    Console.WriteLine($"({SP.Valor[u][v].Key} - {SP.Valor[u][v].Value}), ");
                 }
                 Console.WriteLine();
             }
