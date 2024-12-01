@@ -3,7 +3,6 @@ using System.Security.Cryptography;
 using TesteProjetoGrafos;
 
 var endereco = $"{Directory.GetCurrentDirectory()}/config.txt";
-    //"C:/Users/heito/source/repos/TesteProjetoGrafos/TesteProjetoGrafos/config.txt";
 var fileReader = new FileReader(endereco);
 var lista = fileReader.GetLinhas(); // pega apenas as linhas de configuração
 foreach (var item in lista) Console.WriteLine(item);
