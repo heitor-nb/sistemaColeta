@@ -34,7 +34,7 @@ namespace TesteProjetoGrafos
             }
         }
 
-        public void ExibirNodeCount() => Console.WriteLine($"Node count: {nodeCount}");
+        public int NodeCount() => nodeCount;
 
         public void AddNode(string str)
         {
@@ -46,7 +46,13 @@ namespace TesteProjetoGrafos
                     Index = int.Parse(str),
                 };
                 var index = node.Index;
-                if(index == 0) node.LatasLixo = 0; // **
+                if(index == 0) node.LatasLixo = 0;
+                if(index == maxSize - 1)
+                {
+                    node.Rato = 0;
+                    node.Gato = 0;
+                    node.Cachorro = 0;
+                }
                 Vetor[index] = node;
                 W[index, index] = 0;
                 nodeCount++;
@@ -117,7 +123,7 @@ namespace TesteProjetoGrafos
                 if (node.Rato > 0)
                 {
                     var destino = SP.Valor[node.Index].FirstOrDefault(kvp => Vetor[kvp.Key].Gato == 0);
-                    //Console.WriteLine(destino.ToString());
+                    //Console.WriteLine(destino.ToString()); // destino dos ratos
                     if (destino.Key != 0)
                     {
                         Vetor[destino.Key].Rato += node.Rato - 1; // um rato morre
@@ -128,7 +134,7 @@ namespace TesteProjetoGrafos
                 if (node.Cachorro > 0)
                 {
                     var destino = SP.Valor[node.Index].FirstOrDefault(kvp => Vetor[kvp.Key].Cachorro == 0);
-                    //Console.WriteLine(destino.ToString());
+                    //Console.WriteLine(destino.ToString()); // destino dos gatos
                     if (Vetor[destino.Key] != null)
                     {
                         Vetor[destino.Key].Gato += node.Gato;
@@ -198,8 +204,7 @@ namespace TesteProjetoGrafos
                             node = Vetor[v];
                         }
                     }
-                    else Console.WriteLine($"({symbol}) Caminhão no aterro. Ponto {v} - " +
-                        $"aux = {visitados.Count}");
+                    else Console.WriteLine($"({symbol}) Caminhão no aterro (ponto {v})");
 
                     var ponto = SP.Valor[v][1].Key; // a primeira chave da lista sempre será o próprio v
                     int i = 2;
@@ -225,7 +230,7 @@ namespace TesteProjetoGrafos
                         aux = visitados.Count < maxSize; //visitados.Values.Contains(false);
                         if (!aux)
                         {
-                            Console.WriteLine($"({symbol}) Nenhum ponto a ser visitado\n" +
+                            Console.WriteLine($"({symbol}) Nenhum ponto a ser visitado (aux = {aux})\n" +
                             $"({symbol}) Retornando ao aterro - Capacidade = {truck.Capacidade}");
                             Thread.Sleep(SP.Valor[v].FirstOrDefault(kvp => kvp.Key == 0).Value * 100); // tempo para retornar ao aterro
                         }
