@@ -145,11 +145,14 @@ namespace TesteProjetoGrafos
             }
         }
 
-        public void Percurso(char symbol, int v, ConcurrentDictionary<int, bool> visitados, ConcurrentQueue<Carrocinha> carrocinhas)
+        public void Percurso(char symbol, int v, int func, ConcurrentDictionary<int, bool> visitados, ConcurrentQueue<Carrocinha> carrocinhas)
         {
             if(v < nodeCount && nodeCount > 0)
             {
-                var truck = new Truck();
+                var truck = new Truck
+                {
+                    Funcionarios = func
+                };
                 Console.WriteLine($"Capacidade do caminhão {symbol}: {truck.Capacidade}");
                 var aux = true;
                 while (aux)
