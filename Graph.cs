@@ -158,13 +158,10 @@ namespace TesteProjetoGrafos
                 while (aux)
                 {
                     var node = Vetor[v];
-
                     if(v != 0)
                     {
                         Console.WriteLine($"({symbol}) Recolhendo lixo do ponto {v}");
-
                         int tempo = 1;
-
                         if (node.PossuiAnimal)
                         {
                             if(carrocinhas.TryDequeue(out Carrocinha carrocinha)) // **
@@ -175,15 +172,11 @@ namespace TesteProjetoGrafos
                                     PercusoCarrocinha(carrocinha, Vetor.Length - 1, v, true, carrocinhas);
                                 });
                             }
-
                             tempo = 2;
                             DistribuirAnimais(v);
-
                             Console.WriteLine($"({symbol}) Tempo dobrado em {v} pois lixo espalhado");
                         }
-
                         Thread.Sleep(((node.LatasLixo * lixoPorLata)/truck.Funcionarios) * 100 * tempo); // tempo para recolher o lixo
-
                         var lixoRestante = truck.RecolherLixo(node.LatasLixo * lixoPorLata);
                         node.LatasLixo = (int)Math.Floor((decimal)lixoRestante / lixoPorLata); // **
                         Console.WriteLine($"({symbol}) Capacidade do caminhão: {truck.Capacidade}");
