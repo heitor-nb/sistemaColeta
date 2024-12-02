@@ -22,7 +22,7 @@ namespace TesteProjetoGrafos
             Symbol = str;
             N = new List<Node>();
             var random = new Random();
-            LatasLixo = random.Next(1, 2); // entre 1 e 5 latas por ponto
+            LatasLixo = random.Next(1, 6); // entre 1 e 5 latas por ponto
             // LatasLixo = n;
             Rato = random.Next(2) == 1 ? 1 : 0;
             Gato = random.Next(4) == 3 ? 1 : 0;

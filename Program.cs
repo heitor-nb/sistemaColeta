@@ -188,6 +188,7 @@ try
         Console.WriteLine("Contador iniciado.");
         // ----------
         funcionarios--;
+        if (funcionarios < 3) break;
         Console.WriteLine($"- Quantidade de funcionários: {funcionarios} -");
         for (int i = 0; i < caminhoes; i++)
         {
